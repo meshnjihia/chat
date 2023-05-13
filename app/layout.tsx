@@ -1,3 +1,4 @@
+import ToasterContext from './context/ToasterContext'
 import './globals.css'
 import { Assistant } from 'next/font/google'
 
@@ -15,7 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={font.className}>{children}</body>
+      <body className={font.className}>
+        <ToasterContext />
+        {children}
+      </body>
     </html>
   )
 }

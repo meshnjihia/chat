@@ -1,4 +1,7 @@
 'use client'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { signIn } from 'next-auth/react'
 
 import { BsGithub, BsGoogle } from 'react-icons/bs'
 
@@ -41,10 +44,31 @@ const AuthForm = ({}: AuthFormProps) => {
 
     if (variant === 'REGISTER') {
       // axios Register
+      axios
+        .post('/api/register', data)
+        .catch(() => toast.error('Something went wrong'))
+        .finally(() => {
+          setIsLoading(false)
+          toast.success('Registration successful')
+        })
     }
 
     if (variant === 'LOGIN') {
       // nextAuth sign in
+      signIn('credentials', {
+      ...data,
+      redirect: false,
+      }).then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid credentials')
+        }
+        if (callback?.ok && !callback.error) {
+          toast('Login successful')
+        }
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
     }
   }
 
@@ -52,6 +76,7 @@ const AuthForm = ({}: AuthFormProps) => {
     setIsLoading(true)
 
     // NextAuth sign in
+    
   }
 
   return (
@@ -64,7 +89,8 @@ const AuthForm = ({}: AuthFormProps) => {
               label="Name"
               register={register}
               disabled={isLoading}
-              errors={errors} />
+              errors={errors}
+            />
           )}
           <Input
             id="email"
@@ -111,11 +137,13 @@ const AuthForm = ({}: AuthFormProps) => {
             />
           </div>
         </div>
-        <div className='gap-2 flex justify-center text-sm mt-6 px-2 text-gray-500'>
+        <div className="gap-2 flex justify-center text-sm mt-6 px-2 text-gray-500">
           <div>
-            {variant === 'LOGIN' ? 'New to ChatDew?' : 'Already have an account'}
+            {variant === 'LOGIN'
+              ? 'New to ChatDew?'
+              : 'Already have an account'}
           </div>
-          <div className='underline cursor-pointer' onClick={toggledVariant}>
+          <div className="underline cursor-pointer" onClick={toggledVariant}>
             {variant === 'LOGIN' ? 'Create account' : 'Login'}
           </div>
         </div>
