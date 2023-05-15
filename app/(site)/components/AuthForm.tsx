@@ -1,23 +1,34 @@
 'use client'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 
 import { BsGithub, BsGoogle } from 'react-icons/bs'
 
 import Button from '@app/components/Button'
 import Input from '@app/components/inputs/Input'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useForm, FieldValues, SubmitHandler } from 'react-hook-form'
 import AuthSocialButton from './AuthSocialButton'
+import { useRouter } from 'next/navigation'
 
 type AuthFormProps = {}
 type Variant = 'LOGIN' | 'REGISTER'
 
 const AuthForm = ({}: AuthFormProps) => {
+  const session = useSession()
+  const router = useRouter()
   const [variant, setVariant] = useState<Variant>('LOGIN')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      // setVariant('LOGIN')
+      // console.log('Authentication successful')
+      router.push('/users')
+    }
+  }, [session?.status, router])
 
   const toggledVariant = useCallback(() => {
     if (variant === 'LOGIN') {
@@ -46,6 +57,7 @@ const AuthForm = ({}: AuthFormProps) => {
       // axios Register
       axios
         .post('/api/register', data)
+        .then(() => signIn('credentials', data))
         .catch(() => toast.error('Something went wrong'))
         .finally(() => {
           setIsLoading(false)
@@ -56,9 +68,30 @@ const AuthForm = ({}: AuthFormProps) => {
     if (variant === 'LOGIN') {
       // nextAuth sign in
       signIn('credentials', {
-      ...data,
-      redirect: false,
-      }).then((callback) => {
+        ...data,
+        redirect: false,
+      })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error('Invalid credentials')
+          }
+          if (callback?.ok && !callback.error) {
+            toast('Login successful')
+            router.push('/users')
+          }
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
+  }
+
+  const socialAction = (action: string) => {
+    setIsLoading(true)
+
+    // NextAuth sign in
+    signIn(action, { redirect: false })
+      .then((callback) => {
         if (callback?.error) {
           toast.error('Invalid credentials')
         }
@@ -69,14 +102,6 @@ const AuthForm = ({}: AuthFormProps) => {
       .finally(() => {
         setIsLoading(false)
       })
-    }
-  }
-
-  const socialAction = (action: string) => {
-    setIsLoading(true)
-
-    // NextAuth sign in
-    
   }
 
   return (
