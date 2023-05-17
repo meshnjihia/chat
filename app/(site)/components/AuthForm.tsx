@@ -1,108 +1,108 @@
-'use client'
-import axios from 'axios'
-import { toast } from 'react-toastify'
-import { signIn, useSession } from 'next-auth/react'
+'use client';
 
-import { BsGithub, BsGoogle } from 'react-icons/bs'
+import axios from "axios";
+import { signIn, useSession } from 'next-auth/react';
+import { useCallback, useEffect, useState } from 'react';
+import { BsGithub, BsGoogle  } from 'react-icons/bs';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { useRouter } from "next/navigation";
 
-import Button from '@app/components/Button'
-import Input from '@app/components/inputs/Input'
+import Input from "@/app/components/inputs/Input";
+import AuthSocialButton from './AuthSocialButton';
+import Button from "@/app/components/Button";
+import { toast } from "react-toastify";
 
-import { useCallback, useEffect, useState } from 'react'
-import { useForm, FieldValues, SubmitHandler } from 'react-hook-form'
-import AuthSocialButton from './AuthSocialButton'
-import { useRouter } from 'next/navigation'
+type Variant = 'LOGIN' | 'REGISTER';
 
-type AuthFormProps = {}
-type Variant = 'LOGIN' | 'REGISTER'
-
-const AuthForm = ({}: AuthFormProps) => {
-  const session = useSession()
-  const router = useRouter()
-  const [variant, setVariant] = useState<Variant>('LOGIN')
-  const [isLoading, setIsLoading] = useState(false)
+const AuthForm = () => {
+  const session = useSession();
+  const router = useRouter();
+  const [variant, setVariant] = useState<Variant>('LOGIN');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (session?.status === 'authenticated') {
-      // setVariant('LOGIN')
-      // console.log('Authentication successful')
       router.push('/users')
     }
-  }, [session?.status, router])
+  }, [session?.status, router]);
 
-  const toggledVariant = useCallback(() => {
+  const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') {
-      setVariant('REGISTER')
+      setVariant('REGISTER');
     } else {
-      setVariant('LOGIN')
+      setVariant('LOGIN');
     }
-  }, [variant])
+  }, [variant]);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: {
+      errors,
+    }
   } = useForm<FieldValues>({
     defaultValues: {
       name: '',
       email: '',
-      password: '',
-    },
-  })
+      password: ''
+    }
+  });
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    setIsLoading(true)
-
+    setIsLoading(true);
+  
     if (variant === 'REGISTER') {
-      // axios Register
-      axios
-        .post('/api/register', data)
-        .then(() => signIn('credentials', data))
-        .catch(() => toast.error('Something went wrong'))
-        .finally(() => {
-          setIsLoading(false)
-          toast.success('Registration successful')
-        })
+      axios.post('/api/register', data)
+      .then(() => signIn('credentials', {
+        ...data,
+        redirect: false,
+      }))
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid credentials!');
+        }
+
+        if (callback?.ok) {
+          router.push('/conversations')
+        }
+      })
+      .catch(() => toast.error('Something went wrong!'))
+      .finally(() => setIsLoading(false))
     }
 
     if (variant === 'LOGIN') {
-      // nextAuth sign in
       signIn('credentials', {
         ...data,
-        redirect: false,
+        redirect: false
       })
-        .then((callback) => {
-          if (callback?.error) {
-            toast.error('Invalid credentials')
-          }
-          if (callback?.ok && !callback.error) {
-            toast('Login successful')
-            router.push('/users')
-          }
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error('Invalid credentials!');
+        }
+
+        if (callback?.ok) {
+          router.push('/conversations')
+        }
+      })
+      .finally(() => setIsLoading(false))
     }
   }
 
   const socialAction = (action: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // NextAuth sign in
     signIn(action, { redirect: false })
       .then((callback) => {
         if (callback?.error) {
-          toast.error('Invalid credentials')
+          toast.error('Invalid credentials!');
         }
-        if (callback?.ok && !callback.error) {
-          toast('Login successful')
+
+        if (callback?.ok) {
+          router.push('/conversations')
         }
       })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }
+      .finally(() => setIsLoading(false));
+  } 
 
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -168,7 +168,7 @@ const AuthForm = ({}: AuthFormProps) => {
               ? 'New to ChatDew?'
               : 'Already have an account'}
           </div>
-          <div className="underline cursor-pointer" onClick={toggledVariant}>
+          <div className="underline cursor-pointer" onClick={toggleVariant}>
             {variant === 'LOGIN' ? 'Create account' : 'Login'}
           </div>
         </div>

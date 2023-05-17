@@ -3,7 +3,7 @@
 
 import EmptyState from "@app/components/EmptyState";
 
-const Users = () => {
+const People = () => {
     return ( 
         // <button onClick={() => signOut()}>
         //     logout
@@ -14,4 +14,4 @@ const Users = () => {
     );
 }
 
-export default Users;
+export default People;

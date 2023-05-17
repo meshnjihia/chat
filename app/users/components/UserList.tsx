@@ -4,7 +4,8 @@ import { User } from "@prisma/client"
 import UserBox from "./UserBox"
 
 type UserListProps = {
-    items: User[] 
+  items: User[];
+
 }
 
 const UserList = ({ items }: UserListProps) => {
