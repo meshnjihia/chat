@@ -1,5 +1,5 @@
 'use client'
-
+import {CldUploadButton} from 'next-cloudinary' 
 import useChat from "@app/hooks/useChat"
 import axios from "axios";
 import { FieldValue, FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -25,9 +25,24 @@ const Form = (props: Props) => {
       conversationId: conversationId
     })
   }
+
+  const handleUpload = (result: any) => {
+    axios.post(`/api/messages'`, {
+      image: result?.info?.secure_url,
+      conversationId: conversationId
+    })
+  }
   return (
     <div className="p-4 bg-white border-t flex items-center gap-2 lg:gap-4 w-full">
+      <CldUploadButton
+      options={{
+        maxFiles:1        
+        }}
+        onUpload={handleUpload}
+        uploadPreset='vfvlwbvr'
+      >
       <HiPhoto size={30} className="text-fuchsia-500" />
+      </CldUploadButton>
       <form onSubmit={handleSubmit(onSubmit)} className="flex items-center gap-2 lg:gap-4 w-full">
         <MessageInput
           id='message'
