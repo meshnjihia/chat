@@ -33,7 +33,7 @@ const Header = ({ conversation }: HeaderProps) => {
       <ProfileDrawer
         data={conversation}
         isOpen={drawerOpen}
-        onClose={() => {}}
+        onClose={() => setDrawerOpen(false)}
       />
       <div className='flex bg-white w-full border-b-[1px] sm:px-4 py-3 px-3 lg:px-6 justify-between items-center shadow-sm'>
         <div className='flex gap-3 items-center'>
