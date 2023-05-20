@@ -1,5 +1,5 @@
 'use client'
-import { Transition, Dialog } from '@headlessui/react'
+import {  Dialog } from '@headlessui/react'
 import Modal from '@app/components/Modal'
 import useChat from '@app/hooks/useChat'
 import axios from 'axios'
