@@ -1,34 +1,46 @@
-'use client'
-import {CldUploadButton} from 'next-cloudinary' 
-import useChat from "@app/hooks/useChat"
-import axios from "axios";
-import { FieldValue, FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import { HiPhoto } from "react-icons/hi2";
+'use client';
+
+import { 
+  HiPaperAirplane, 
+  HiPhoto
+} from "react-icons/hi2";
 import MessageInput from "./MessageInput";
-import { HiPaperAirplane } from "react-icons/hi2";
+import { 
+  FieldValues, 
+  SubmitHandler, 
+  useForm 
+} from "react-hook-form";
+import axios from "axios";
+import { CldUploadButton } from "next-cloudinary";
+import useChat from "@/app/hooks/useChat";
 
-type Props = {}
-
-const Form = (props: Props) => {
+const Form = () => {
   const { conversationId } = useChat();
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FieldValues>({
-    defaultValues: {
-      message:'',
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: {
+      errors,
     }
-  })
+  } = useForm<FieldValues>({
+    defaultValues: {
+      message: ''
+    }
+  });
 
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    setValue('message', '', { shouldValidate: true })
-    axios.post(`/api/messages`, {
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setValue('message', '', { shouldValidate: true });
+    axios.post('/api/messages', {
       ...data,
       conversationId: conversationId
     })
   }
 
   const handleUpload = (result: any) => {
-    axios.post(`/api/messages`, {
-      image: result?.info?.secure_url,
+    axios.post('/api/messages', {
+      image: result.info.secure_url,
       conversationId: conversationId
     })
   }
@@ -51,7 +63,10 @@ const Form = (props: Props) => {
           placeholder="Write your message..."
           errors={errors}
         />
-        <button type="submit" className="rounded-full bg-fuchsia-500 p-2 hover:bg-fuchsia-600 transition text-white ">
+        <button
+          type="submit"
+          className="rounded-full bg-fuchsia-500 p-2 hover:bg-fuchsia-600 transition text-white"
+        >
           <HiPaperAirplane size={18}/>
         </button>
       </form>
