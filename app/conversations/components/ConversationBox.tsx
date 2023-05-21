@@ -1,5 +1,6 @@
 'use client'
 import Avatar from '@app/components/Avatar'
+import AvatarGroup from '@app/components/AvatarGroup'
 import useOtherUser from '@app/hooks/useOtherUser'
 import { FullConversationType } from '@app/types'
 import clsx from 'clsx'
@@ -8,89 +9,100 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 
-
 type ConversationBoxProps = {
-    data: FullConversationType
-    selected?: boolean
+  data: FullConversationType
+  selected?: boolean
 }
 
 const ConversationBox = ({ data, selected }: ConversationBoxProps) => {
-
-  const otherUser = useOtherUser(data);
-  const session = useSession();
-  const router = useRouter();
+  const otherUser = useOtherUser(data)
+  const session = useSession()
+  const router = useRouter()
 
   const handleClick = useCallback(() => {
-    router.push(`/conversations/${data.id}`);
-  }, [router, data.id]);
+    router.push(`/conversations/${data.id}`)
+  }, [router, data.id])
 
   const lastMessage = useMemo(() => {
-    const messages = data.messages || [];
+    const messages = data.messages || []
 
-    return messages[messages.length - 1];
-  }, [data.messages]);
+    return messages[messages.length - 1]
+  }, [data.messages])
 
   const userEmail = useMemo(() => {
-    return session.data?.user?.email;
-  }, [session.data?.user?.email]);
+    return session.data?.user?.email
+  }, [session.data?.user?.email])
 
   const hasSeen = useMemo(() => {
-    if (!lastMessage)
-    {
-      return false;
+    if (!lastMessage) {
+      return false
     }
 
-    const seenArray = lastMessage.seen || [];
+    const seenArray = lastMessage.seen || []
 
-    if(!userEmail)
-    {
-      return false;
+    if (!userEmail) {
+      return false
     }
 
-    return seenArray
-    .filter((user) => user.email === userEmail).length !== 0;
-  }, [lastMessage, userEmail]);
-  
+    return seenArray.filter((user) => user.email === userEmail).length !== 0
+  }, [lastMessage, userEmail])
+
   const lastMessageText = useMemo(() => {
-    if(lastMessage?.image) {
-      return 'sent an image';
+    if (lastMessage?.image) {
+      return 'sent an image'
     }
 
-    if(lastMessage?.body) {
-      return lastMessage.body;
+    if (lastMessage?.body) {
+      return lastMessage.body
     }
 
-    return 'Started a conversation';
-  }, [lastMessage]);
+    return 'Started a conversation'
+  }, [lastMessage])
 
   return (
-    <div onClick={handleClick}
-      className={clsx(`w-full relative flex items-center space-x-3 rounded-lg transition hover:bg-white cursor-pointer p-3`,
-      selected ? 'bg-white' : 'bg-neutral-100'
-      )}>
-      <Avatar user={otherUser} />
-      <div className='min-w-0 flex-1'>
-        <div className='focus:outline-none'>
-          <div className='flex items-center justify-between mb-1'>
-            <p className='text-md font-medium text-gray-900'>
+    <div
+      onClick={handleClick}
+      className={clsx(
+        `w-full relative flex items-center space-x-3 rounded-lg transition hover:bg-white cursor-pointer p-3`,
+        selected ? 'bg-white' : 'bg-neutral-100',
+      )}
+    >
+      {
+        data.isGroup ?
+          (
+            <AvatarGroup
+              users={data.users}
+            />
+          ) : (
+            <Avatar
+              user={otherUser}
+            />
+          )}
+      <div className="min-w-0 flex-1">
+        <div className="focus:outline-none">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-md font-medium text-gray-900">
               {data.name || otherUser.name}
             </p>
             {lastMessage?.createdAt && (
-              <p className='text-xs text-gray-500 font-light'>
+              <p className="text-xs text-gray-500 font-light">
                 {format(new Date(lastMessage.createdAt), 'HH:mm')}
               </p>
             )}
           </div>
-          <p className={clsx(`
+          <p
+            className={clsx(
+              `
           truncate text-sm
           `,
-            hasSeen ? 'text-gray-500' : 'text-black font-medium'
-          )}>
+              hasSeen ? 'text-gray-500' : 'text-black font-medium',
+            )}
+          >
             {lastMessageText}
           </p>
         </div>
       </div>
-      </div>
+    </div>
   )
 }
 
